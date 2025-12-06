@@ -4,4 +4,6 @@ import 'package:depd_mvvm_2025/view/widgets/widgets.dart';
 import 'package:depd_mvvm_2025/viewmodel/home_viewmodel.dart';
 import 'package:depd_mvvm_2025/data/response/status.dart';
 
-part 'home_page.dart';
+part 'DomesticPage.dart';
+part 'InternationalPage.dart';
+part 'MainMenuPage.dart';

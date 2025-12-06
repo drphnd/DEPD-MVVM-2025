@@ -4,6 +4,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:depd_mvvm_2025/shared/style.dart';
 import 'package:depd_mvvm_2025/view/pages/pages.dart';
 import 'package:depd_mvvm_2025/viewmodel/home_viewmodel.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 Future<void> main() async {
   // Memastikan binding Flutter sudah diinisialisasi sebelum menjalankan aplikasi
@@ -13,7 +14,6 @@ Future<void> main() async {
 
   runApp(const MyApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -27,9 +27,16 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primaryColor: Style.blue800,
           scaffoldBackgroundColor: Style.grey50,
-          textTheme: Theme.of(
-            context,
-          ).textTheme.apply(bodyColor: Style.black, displayColor: Style.black),
+          
+          // --- BAGIAN INI DIPERBAIKI ---
+          textTheme: GoogleFonts.poppinsTextTheme(
+            Theme.of(context).textTheme,
+          ).apply(
+            bodyColor: Style.black, 
+            displayColor: Style.black,
+          ),
+          // -----------------------------
+
           elevatedButtonTheme: ElevatedButtonThemeData(
             style: ButtonStyle(
               backgroundColor: WidgetStateProperty.all<Color>(Style.blue800),
@@ -56,8 +63,12 @@ class MyApp extends StatelessWidget {
           ),
           useMaterial3: true,
         ),
+        
+        // Pastikan MainMenuPage sudah diimport dari 'package:depd_mvvm_2025/view/pages/pages.dart'
+        // Ubah route '/' ke MainMenuPage jika sudah dibuat sesuai brief, 
+        // atau tetap HomePage jika baru tahap awal.
         initialRoute: '/',
-        routes: {'/': (context) => const HomePage()},
+        routes: {'/': (context) => const MainMenuPage()}, 
       ),
     );
   }

@@ -9,11 +9,14 @@ class HomeViewModel with ChangeNotifier {
   // Repository untuk akses API
   final _homeRepo = HomeRepository();
 
+  // ===============================================================
+  // BAGIAN DOMESTIK (LAMA)
+  // ===============================================================
+
   // State daftar provinsi
   ApiResponse<List<Province>> provinceList = ApiResponse.notStarted();
   setProvinceList(ApiResponse<List<Province>> response) {
     provinceList = response;
-    // Untuk memberitahu semua widget yang sedang mendengarkan (listening) bahwa ketika ada perubahan data yang terjadi, maka widget tersebut perlu di-rebuild (render ulang).
     notifyListeners();
   }
 
@@ -21,15 +24,11 @@ class HomeViewModel with ChangeNotifier {
   Future getProvinceList() async {
     if (provinceList.status == Status.completed) return;
     setProvinceList(ApiResponse.loading());
-    // Panggil repository untuk fetch data dan sesuaikan output berdasarkan statusnya
     _homeRepo
-        // fetchProvinceList() akan mengembalikan Future<List<Province>>
         .fetchProvinceList()
-        // Menggunakan then untuk menangani hasil sukses
         .then((value) {
           setProvinceList(ApiResponse.completed(value));
         })
-        // Menggunakan onError untuk menangani error
         .onError((error, _) {
           setProvinceList(ApiResponse.error(error.toString()));
         });
@@ -88,21 +87,21 @@ class HomeViewModel with ChangeNotifier {
         });
   }
 
-  // State daftar biaya ongkir
+  // State daftar biaya ongkir (Domestik)
   ApiResponse<List<Costs>> costList = ApiResponse.notStarted();
   setCostList(ApiResponse<List<Costs>> response) {
     costList = response;
     notifyListeners();
   }
 
-  // Flag loading untuk proses cek ongkir
+  // Flag loading umum
   bool isLoading = false;
   void setLoading(bool value) {
     isLoading = value;
     notifyListeners();
   }
 
-  // Hitung biaya pengiriman (set loading + handle success/error). Terdapat objek yang merepresentasikan nilai (atau error) yang akan tersedia di masa depan (asynchronous)
+  // Hitung biaya pengiriman Domestik
   Future checkShipmentCost(
     String origin,
     String originType,
@@ -128,6 +127,66 @@ class HomeViewModel with ChangeNotifier {
         })
         .onError((error, _) {
           setCostList(ApiResponse.error(error.toString()));
+          setLoading(false);
+        });
+  }
+
+  // ===============================================================
+  // BAGIAN INTERNASIONAL (BARU) - Tambahkan ini untuk fix error
+  // ===============================================================
+
+  // 1. State daftar tujuan internasional (Hasil pencarian)
+  ApiResponse<List<City>> internationalDestinationList = ApiResponse.notStarted();
+  
+  void setInternationalDestinationList(ApiResponse<List<City>> response) {
+    internationalDestinationList = response;
+    notifyListeners();
+  }
+
+  // Fungsi pencarian negara/kota tujuan
+  Future<void> searchInternationalDestination(String query) async {
+    // Jangan cari jika teks terlalu pendek
+    if (query.length < 3) return; 
+
+    // Set status loading khusus untuk dropdown pencarian
+    setInternationalDestinationList(ApiResponse.loading());
+    
+    _homeRepo
+        .fetchInternationalDestination(query)
+        .then((value) {
+          setInternationalDestinationList(ApiResponse.completed(value));
+        })
+        .onError((error, _) {
+          setInternationalDestinationList(ApiResponse.error(error.toString()));
+        });
+  }
+
+  // 2. State hasil ongkir internasional
+  ApiResponse<List<Costs>> internationalCostList = ApiResponse.notStarted();
+  
+  void setInternationalCostList(ApiResponse<List<Costs>> response) {
+    internationalCostList = response;
+    notifyListeners();
+  }
+
+  // Fungsi Cek Ongkir Internasional
+  Future<void> checkInternationalCost(
+    String origin,
+    String destination,
+    int weight,
+    String courier,
+  ) async {
+    setLoading(true); // Pakai loading global untuk memblokir layar
+    setInternationalCostList(ApiResponse.loading());
+    
+    _homeRepo
+        .checkInternationalCost(origin, destination, weight, courier)
+        .then((value) {
+          setInternationalCostList(ApiResponse.completed(value));
+          setLoading(false);
+        })
+        .onError((error, _) {
+          setInternationalCostList(ApiResponse.error(error.toString()));
           setLoading(false);
         });
   }
